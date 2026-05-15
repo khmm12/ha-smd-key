@@ -51,6 +51,20 @@ docker compose restart homeassistant
 docker compose down
 ```
 
+### Development Checks
+
+Run the same local checks expected before pushing:
+
+```bash
+uv run poe validate
+```
+
+This runs formatting, linting, tests, and hassfest. To run only hassfest:
+
+```bash
+uv run poe hassfest
+```
+
 ### Manual
 
 Copy `custom_components/smd_d_keys` into your Home Assistant `custom_components` directory and restart Home Assistant.
