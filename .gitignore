@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.python-version
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Home Assistant / tests
+.local/
+.storage/
+deps/
+tts/
+home-assistant.log*
+
+# Local environment and secrets
+.env
+.env.*
+*.secret
+secrets.yaml
+
+# Reverse-engineering artifacts: keep these outside git.
+*.apk
+*.xapk
+*.apks
+*.aab
+*.dex
+*.idsig
+reverse-artifacts/
+apk-artifacts/
+captures/
+mitmproxy/
+*.pcap
+*.pcapng
+*.har
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/

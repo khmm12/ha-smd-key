@@ -1,0 +1,96 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "SMD D-KEYS",
+        "description": "Enter the phone number used in the D-KEYS app.",
+        "data": {
+          "phone": "Phone number"
+        }
+      },
+      "otp": {
+        "title": "Enter call code",
+        "description": "SMD will call your phone from a unique number. Enter the last 6 digits of the caller number, then hang up and confirm.",
+        "data": {
+          "otp": "Last 6 digits"
+        }
+      },
+      "select_doors": {
+        "title": "Select doors",
+        "data": {
+          "selected_doors": "Doors"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Reauthenticate SMD D-KEYS",
+        "description": "Request a fresh authentication call for this SMD account.",
+        "data": {
+          "phone": "Phone number"
+        }
+      },
+      "reauth_otp": {
+        "title": "Enter call code",
+        "description": "Enter the last 6 digits of the caller number from the SMD authentication call.",
+        "data": {
+          "otp": "Last 6 digits"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to SMD.",
+      "cannot_fetch_doors": "SMD accepted the call code but did not return the door list.",
+      "invalid_auth": "SMD rejected the credentials.",
+      "invalid_call_code": "Enter exactly the last 6 digits of the caller number.",
+      "invalid_otp": "SMD rejected the call code.",
+      "invalid_phone": "Phone number is invalid.",
+      "no_doors": "No doors were returned for this account.",
+      "no_doors_selected": "Select at least one door."
+    },
+    "abort": {
+      "already_configured": "This SMD account is already configured.",
+      "reauth_successful": "SMD D-KEYS reauthentication was successful."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "SMD D-KEYS options",
+        "data": {
+          "selected_doors": "Doors",
+          "relock_delay": "Assumed relock delay"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to SMD.",
+      "invalid_auth": "SMD rejected the saved token.",
+      "no_doors_selected": "Select at least one door."
+    }
+  },
+  "entity": {
+    "camera": {
+      "camera": {
+        "name": "Camera"
+      }
+    },
+    "lock": {
+      "lock": {
+        "name": "Lock"
+      }
+    }
+  },
+  "exceptions": {
+    "auth_failed": {
+      "message": "SMD authentication expired or was revoked. Reauthenticate the integration."
+    },
+    "cannot_connect": {
+      "message": "Could not connect to SMD."
+    },
+    "camera_stream_failed": {
+      "message": "SMD did not return a live camera stream."
+    },
+    "open_failed": {
+      "message": "SMD rejected the open-door command."
+    }
+  }
+}

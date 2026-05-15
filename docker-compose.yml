@@ -1,0 +1,12 @@
+services:
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: ha-smd-d-keys
+    environment:
+      TZ: Europe/Moscow
+    ports:
+      - "8123:8123"
+    volumes:
+      - ./.local/homeassistant/config:/config
+      - ./custom_components/smd_d_keys:/config/custom_components/smd_d_keys:ro
+    restart: unless-stopped

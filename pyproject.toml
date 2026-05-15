@@ -1,0 +1,71 @@
+[project]
+name = "ha-smd-d-keys"
+version = "0.1.0"
+description = "Home Assistant custom integration for SMD D-KEYS intercoms"
+readme = "README.md"
+requires-python = ">=3.14.2"
+license = "MIT"
+authors = [
+  { name = "khmm12" },
+]
+dependencies = []
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+  "aioresponses>=0.7.8",
+  "homeassistant>=2026.5.0,<2026.6.0",
+  "pytest>=8.3.0",
+  "pytest-asyncio>=0.26.0",
+  "pytest-homeassistant-custom-component>=0.13.323",
+  "PyTurboJPEG>=1.8.2",
+  "ruff>=0.11.0",
+]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 88
+src = ["custom_components", "tests"]
+
+[tool.ruff.lint]
+select = [
+  "A",
+  "ASYNC",
+  "B",
+  "C4",
+  "DTZ",
+  "E",
+  "F",
+  "FA",
+  "FLY",
+  "I",
+  "ICN",
+  "ISC",
+  "LOG",
+  "N",
+  "PERF",
+  "PIE",
+  "PL",
+  "PT",
+  "PTH",
+  "RET",
+  "RUF",
+  "SIM",
+  "T20",
+  "UP",
+  "W",
+]
+ignore = [
+  "PLR0913",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = [
+  "--strict-markers",
+  "--strict-config",
+]
