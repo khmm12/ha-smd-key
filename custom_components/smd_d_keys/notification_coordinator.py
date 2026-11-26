@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import time
 from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
@@ -24,6 +25,7 @@ _LOGGER = logging.getLogger(__name__)
 
 NOTIFICATION_STORE_VERSION = 1
 LAST_NOTIFICATION_ID = "last_notification_id"
+FULL_SYNC_SECONDS = 900
 
 
 class SmdNotificationsCoordinator(DataUpdateCoordinator[SmdNotificationsData]):
@@ -51,13 +53,12 @@ class SmdNotificationsCoordinator(DataUpdateCoordinator[SmdNotificationsData]):
         self._store = store
         self._doors = doors
         self._last_notification_id = last_notification_id
+        self._last_full_sync: float | None = None
 
     async def _async_update_data(self) -> SmdNotificationsData:
-        """Fetch unread notifications and filter out already seen IDs."""
+        """Fetch unread notifications and periodically reconcile history."""
         try:
-            notifications = await self.client.async_get_unread_notifications(
-                self._doors
-            )
+            unread = await self.client.async_get_unread_notifications(self._doors)
         except SmdAuthError as err:
             raise ConfigEntryAuthFailed(
                 translation_domain=DOMAIN,
@@ -66,20 +67,37 @@ class SmdNotificationsCoordinator(DataUpdateCoordinator[SmdNotificationsData]):
         except (SmdConnectionError, SmdApiError) as err:
             raise UpdateFailed("Failed to fetch SMD notifications") from err
 
+        history: list[SmdNotification] = []
+        now = time.monotonic()
+        if (
+            self._last_full_sync is None
+            or now - self._last_full_sync >= FULL_SYNC_SECONDS
+        ):
+            try:
+                history = await self.client.async_get_all_notifications(self._doors)
+            except (SmdConnectionError, SmdApiError) as err:
+                _LOGGER.debug(
+                    "SMD notification history sync failed: %s", type(err).__name__
+                )
+            else:
+                self._last_full_sync = now
+
+        if self._last_notification_id is None and self._last_full_sync is None:
+            raise UpdateFailed("Initial SMD notification history sync failed")
+
+        merged = merge_notifications(unread, history)
         if self._last_notification_id is None:
-            new, newest = filter_new_notifications(notifications, None)
+            new, newest = filter_new_notifications(merged, None)
             self._last_notification_id = newest
             await self._async_save_last_id()
-            return SmdNotificationsData(notifications=notifications, new=new)
+            return SmdNotificationsData(notifications=merged, new=new)
 
-        new, newest = filter_new_notifications(
-            notifications, self._last_notification_id
-        )
+        new, newest = filter_new_notifications(merged, self._last_notification_id)
         if new:
             self._last_notification_id = newest
             await self._async_save_last_id()
         return SmdNotificationsData(
-            notifications=notifications,
+            notifications=merged,
             new=sorted(new, key=lambda item: item.id),
         )
 
@@ -99,3 +117,12 @@ def filter_new_notifications(
         return [], max((item.id for item in notifications), default=0)
     new = [item for item in notifications if item.id > last_notification_id]
     return new, max((item.id for item in new), default=last_notification_id)
+
+
+def merge_notifications(
+    unread: list[SmdNotification], history: list[SmdNotification]
+) -> list[SmdNotification]:
+    """Merge unread and history entries by ID, preferring unread data."""
+    merged = {item.id: item for item in history}
+    merged.update({item.id: item for item in unread})
+    return sorted(merged.values(), key=lambda item: item.id)

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2 - 2026-11-26
+
+- Reconcile the notification history every 15 minutes, so a push that the phone
+  app acknowledges before the next poll is still seen by Home Assistant. The
+  first sync records the current history without replaying old events.
+
 ## 0.2.1 - 2026-11-26
 
 - Fix notification cursor persistence with the Home Assistant storage API.

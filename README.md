@@ -92,7 +92,7 @@ Archive playback, answering calls with two-way audio, WebRTC handling, and FCM/R
 
 ## Notifications and Guest Photos
 
-The integration polls the account's unread SMD notifications every 30 seconds. No Firebase or RuStore registration is needed, so events can lag by up to half a minute.
+The integration polls the account's unread SMD notifications every 30 seconds and reconciles the notification history every 15 minutes. No Firebase or RuStore registration is needed, so events can lag by up to half a minute.
 
 - `event.<account>_notification` fires for `incoming_call`, `guest_photo`, `message`, and `other` pushes. Attributes include the notification ID, timestamp, title, body, caller, and the matching door when SMD provides one.
 - `image.<account>_last_guest_photo` holds the last guest photo pushed with a photo notification.

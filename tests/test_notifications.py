@@ -17,6 +17,7 @@ from custom_components.smd_d_keys.const import (
 from custom_components.smd_d_keys.models import SmdDoor, SmdNotification
 from custom_components.smd_d_keys.notification_coordinator import (
     filter_new_notifications,
+    merge_notifications,
 )
 
 PHOTO_URL = "https://fimg.example.test/photo/1"
@@ -190,3 +191,37 @@ def test_filter_new_notifications() -> None:
     assert filter_new_notifications(notifications, None) == ([], 7)
     assert filter_new_notifications(notifications, 5) == ([notifications[1]], 7)
     assert filter_new_notifications(notifications, 7) == ([], 7)
+
+
+def test_merge_notifications_prefers_unread() -> None:
+    """Merge history with unread data and keep IDs unique."""
+    history = [
+        SmdNotification(
+            id=1,
+            kind=EVENT_INCOMING_CALL,
+            created_at=None,
+            title="history",
+            body=None,
+        ),
+        SmdNotification(
+            id=2,
+            kind=EVENT_GUEST_PHOTO,
+            created_at=None,
+            title="photo",
+            body=None,
+        ),
+    ]
+    unread = [
+        SmdNotification(
+            id=1,
+            kind=EVENT_INCOMING_CALL,
+            created_at=None,
+            title="unread",
+            body=None,
+        )
+    ]
+
+    merged = merge_notifications(unread, history)
+
+    assert [item.id for item in merged] == [1, 2]
+    assert merged[0].title == "unread"
