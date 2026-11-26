@@ -73,6 +73,16 @@
         "name": "Камера"
       }
     },
+    "event": {
+      "notification": {
+        "name": "Уведомление"
+      }
+    },
+    "image": {
+      "last_guest_photo": {
+        "name": "Последнее фото гостя"
+      }
+    },
     "lock": {
       "lock": {
         "name": "Замок"

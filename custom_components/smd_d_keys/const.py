@@ -19,6 +19,15 @@ DEFAULT_RELOCK_DELAY = 5
 DEFAULT_MDE_URL = "https://mde.s-m-d.ru:38257/DKeys_app_3/MAIN.php/"
 DEFAULT_CMDC_URL = "https://cmdc.s-m-d.ru:8626"
 DEFAULT_L2_URL = "http://mqapp.s-m-d.ru:47393"
+DEFAULT_PUSH_URL = "https://push.s-m-d.ru:49051"
+
+NOTIFICATION_POLL_SECONDS = 30
+NOTIFICATION_IMAGE_MAX_BYTES = 10 * 1024 * 1024
+
+EVENT_INCOMING_CALL = "incoming_call"
+EVENT_GUEST_PHOTO = "guest_photo"
+EVENT_MESSAGE = "message"
+EVENT_OTHER = "other"
 
 APP_OS = "Android"
 APP_LANG = "ru"

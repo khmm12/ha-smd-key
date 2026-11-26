@@ -17,6 +17,8 @@ from ..const import (
     DEFAULT_CMDC_URL,
     DEFAULT_L2_URL,
     DEFAULT_MDE_URL,
+    DEFAULT_PUSH_URL,
+    NOTIFICATION_IMAGE_MAX_BYTES,
 )
 from . import helpers
 from .errors import (
@@ -51,6 +53,7 @@ class SmdBaseClient:
         mde_url: str = DEFAULT_MDE_URL,
         cmdc_url: str | None = None,
         l2_url: str | None = None,
+        push_url: str | None = None,
         app_version: str = APP_VERSION,
         app_lang: str = APP_LANG,
         app_os: str = APP_OS,
@@ -64,6 +67,7 @@ class SmdBaseClient:
         self._mde_url = mde_url
         self.cmdc_url = (cmdc_url or DEFAULT_CMDC_URL).rstrip("/")
         self.l2_url = (l2_url or DEFAULT_L2_URL).rstrip("/")
+        self.push_url = (push_url or DEFAULT_PUSH_URL).rstrip("/")
         self._app_version = app_version
         self._app_lang = app_lang
         self._app_os = app_os
@@ -129,6 +133,48 @@ class SmdBaseClient:
             helpers.safe_payload_summary(payload).get("DATA"),
         )
         return payload
+
+    async def _request_bytes(
+        self,
+        method: str,
+        url: str,
+        *,
+        max_bytes: int = NOTIFICATION_IMAGE_MAX_BYTES,
+        **kwargs: Any,
+    ) -> bytes:
+        """Send a request and return a bounded binary response."""
+        action = helpers.request_action(kwargs)
+        try:
+            async with self._session.request(
+                method,
+                url,
+                timeout=REQUEST_TIMEOUT,
+                ssl=self._ssl_context,
+                **kwargs,
+            ) as response:
+                self._raise_for_status(response, action)
+                content_type = response.headers.get("Content-Type", "").lower()
+                if "json" in content_type:
+                    payload = await response.json(content_type=None)
+                    if isinstance(payload, dict):
+                        self._raise_for_error(payload, authenticated=True)
+                    raise SmdMalformedResponseError("SMD returned JSON, not an image")
+                if not content_type.startswith("image/"):
+                    raise SmdMalformedResponseError(
+                        "SMD returned unexpected content type: "
+                        f"{content_type or 'none'}"
+                    )
+                data = await response.content.read(max_bytes + 1)
+        except TimeoutError as err:
+            raise SmdConnectionError("Timed out connecting to SMD") from err
+        except ClientError as err:
+            raise SmdConnectionError("Failed to connect to SMD") from err
+        except ValueError as err:
+            raise SmdMalformedResponseError("SMD returned invalid JSON") from err
+
+        if len(data) > max_bytes:
+            raise SmdApiError("SMD image is too large")
+        return data
 
     @staticmethod
     def _raise_for_status(response: ClientResponse, action: str | None = None) -> None:

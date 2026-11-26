@@ -73,6 +73,16 @@
         "name": "Camera"
       }
     },
+    "event": {
+      "notification": {
+        "name": "Notification"
+      }
+    },
+    "image": {
+      "last_guest_photo": {
+        "name": "Last guest photo"
+      }
+    },
     "lock": {
       "lock": {
         "name": "Lock"

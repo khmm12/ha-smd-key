@@ -31,7 +31,9 @@ async def async_get_config_entry_diagnostics(
     """Return diagnostics for a config entry."""
     runtime_data = getattr(entry, "runtime_data", None)
     coordinator = getattr(runtime_data, "coordinator", None)
+    notifications = getattr(runtime_data, "notifications", None)
     doors = coordinator.data if coordinator else {}
+    notification_data = notifications.data if notifications else None
     return {
         "entry": {
             "data": _redact(entry.data),
@@ -41,6 +43,12 @@ async def async_get_config_entry_diagnostics(
             "door_count": len(doors or {}),
             "last_update_success": bool(
                 coordinator.last_update_success if coordinator else False
+            ),
+            "notification_count": len(notification_data.notifications)
+            if notification_data
+            else 0,
+            "notifications_update_success": bool(
+                notifications.last_update_success if notifications else False
             ),
         },
     }

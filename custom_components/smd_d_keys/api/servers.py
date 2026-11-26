@@ -44,6 +44,8 @@ class SmdServerActions(SmdBaseClient):
             self.cmdc_url = cmdc_url.rstrip("/")
         if l2_url := normalized_servers.get("L2"):
             self.l2_url = l2_url.rstrip("/")
+        if push_url := normalized_servers.get("PUSH"):
+            self.push_url = push_url.rstrip("/")
         _LOGGER.debug(
             "SMD server discovery completed: count=%s has_cmdc=%s has_l2=%s",
             len(servers),

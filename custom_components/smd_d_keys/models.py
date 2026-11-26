@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .api import SmdDKeysClient
     from .coordinator import SmdDKeysCoordinator
+    from .notification_coordinator import SmdNotificationsCoordinator
 
 
 @dataclass(frozen=True, slots=True)
@@ -68,9 +69,32 @@ class SmdCamera:
     online: bool | None
 
 
+@dataclass(frozen=True, slots=True)
+class SmdNotification:
+    """Runtime representation of an SMD push notification."""
+
+    id: int
+    kind: str
+    created_at: str | None
+    title: str | None
+    body: str | None
+    caller: str | None = None
+    door_id: str | None = None
+    file_url: str | None = None
+
+
+@dataclass(slots=True)
+class SmdNotificationsData:
+    """Latest SMD notification poll result."""
+
+    notifications: list[SmdNotification]
+    new: list[SmdNotification]
+
+
 @dataclass(slots=True)
 class SmdDKeysRuntimeData:
     """Runtime data stored on the config entry."""
 
     client: SmdDKeysClient
     coordinator: SmdDKeysCoordinator
+    notifications: SmdNotificationsCoordinator
