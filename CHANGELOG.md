@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0 - 2026-11-26
+
+- Add a notification event entity for incoming calls, guest photos, and other
+  SMD pushes. The integration polls unread notifications; no Firebase
+  registration is needed.
+- Add a last guest photo image entity that downloads the signed HTTPS file
+  pushed with a photo notification.
+- Refresh the stored RTSP source when an existing camera stream has failed, so
+  expired stream credentials can recover without reloading the entry.
+- Run ruff and pytest in GitHub Actions and ship a 256x256 brand icon.
+
 ## 0.1.2 - 2026-11-26
 
 - Build the SMD TLS context in the executor instead of the event loop.
