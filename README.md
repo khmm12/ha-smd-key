@@ -86,9 +86,18 @@ Manual token entry is intentionally not supported.
 
 Live camera support uses the Android app's account-level `getVideo` and `getVideoBroadcastByProtocol` flow. The integration returns an RTSP source to Home Assistant; Home Assistant's stream stack and go2rtc can then restream it for dashboards and companion apps.
 
-The current MVP is live-stream-only. Still images and thumbnails are not fetched from SMD yet.
+The current MVP is live-stream-only; Home Assistant can generate still images from that stream. SMD does not provide a separate live snapshot endpoint for the camera entity.
 
-Archive playback, incoming video calls, WebRTC handling, and push-event handling are intentionally left for later iterations.
+Archive playback, answering calls with two-way audio, WebRTC handling, and FCM/RuStore push registration are intentionally left for later iterations.
+
+## Notifications and Guest Photos
+
+The integration polls the account's unread SMD notifications every 30 seconds. No Firebase or RuStore registration is needed, so events can lag by up to half a minute.
+
+- `event.<account>_notification` fires for `incoming_call`, `guest_photo`, `message`, and `other` pushes. Attributes include the notification ID, timestamp, title, body, caller, and the matching door when SMD provides one.
+- `image.<account>_last_guest_photo` holds the last guest photo pushed with a photo notification.
+
+The integration only reports calls; it does not answer them or provide two-way audio. Guest photo links are signed and expire, so the image is downloaded as soon as a new notification is seen; older photos may no longer be available.
 
 ## Troubleshooting
 
