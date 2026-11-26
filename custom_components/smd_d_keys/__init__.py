@@ -11,6 +11,7 @@ from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import SmdAuthError, SmdConnectionError, SmdDKeysClient
+from .api.tls import smd_ssl_context
 from .const import CONF_CMDC_URL, CONF_L2_URL, CONF_PHONE, CONF_TOKEN, DOMAIN
 from .coordinator import SmdDKeysCoordinator
 from .models import SmdDKeysRuntimeData
@@ -24,12 +25,14 @@ type SmdDKeysConfigEntry = ConfigEntry[SmdDKeysRuntimeData]
 async def async_setup_entry(hass: HomeAssistant, entry: SmdDKeysConfigEntry) -> bool:
     """Set up SMD D-KEYS from a config entry."""
     _LOGGER.debug("Setting up SMD D-KEYS entry %s", entry.entry_id)
+    ssl_context = await hass.async_add_executor_job(smd_ssl_context)
     client = SmdDKeysClient(
         async_get_clientsession(hass),
         phone=entry.data[CONF_PHONE],
         token=entry.data[CONF_TOKEN],
         cmdc_url=entry.data.get(CONF_CMDC_URL),
         l2_url=entry.data.get(CONF_L2_URL),
+        ssl_context=ssl_context,
     )
     coordinator = SmdDKeysCoordinator(hass, entry, client)
     entry.runtime_data = SmdDKeysRuntimeData(client=client, coordinator=coordinator)

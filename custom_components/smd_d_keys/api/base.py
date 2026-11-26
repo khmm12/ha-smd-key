@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import ssl
 from collections.abc import Mapping
 from typing import Any
 
@@ -27,7 +28,6 @@ from .errors import (
     SmdRateLimitError,
 )
 from .helpers import JsonObject
-from .tls import smd_ssl_context
 
 REQUEST_TIMEOUT = ClientTimeout(total=15)
 HTTP_BAD_REQUEST = 400
@@ -55,6 +55,7 @@ class SmdBaseClient:
         app_lang: str = APP_LANG,
         app_os: str = APP_OS,
         app_version_os: str = APP_VERSION_OS,
+        ssl_context: ssl.SSLContext | None = None,
     ) -> None:
         """Initialize the client."""
         self._session = session
@@ -67,6 +68,7 @@ class SmdBaseClient:
         self._app_lang = app_lang
         self._app_os = app_os
         self._app_version_os = app_version_os
+        self._ssl_context = ssl_context
         self._server_urls: dict[str, str] = {}
 
     def _common_params(
@@ -105,7 +107,7 @@ class SmdBaseClient:
                 method,
                 url,
                 timeout=REQUEST_TIMEOUT,
-                ssl=smd_ssl_context(),
+                ssl=self._ssl_context,
                 **kwargs,
             ) as response:
                 self._raise_for_status(response, action)

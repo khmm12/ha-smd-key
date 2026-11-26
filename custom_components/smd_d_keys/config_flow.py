@@ -23,6 +23,7 @@ from .api import (
     normalize_call_code,
     normalize_phone,
 )
+from .api.tls import smd_ssl_context
 from .const import (
     CONF_ACCOUNT_ID,
     CONF_CMDC_URL,
@@ -64,7 +65,7 @@ class SmdDKeysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors[CONF_PHONE] = "invalid_phone"
             else:
                 self._phone = phone
-                self._client = self._new_client(phone=phone)
+                self._client = await self._new_client(phone=phone)
                 _LOGGER.debug(
                     "Starting SMD config flow authentication call: phone_digits=%s",
                     len(phone),
@@ -196,7 +197,7 @@ class SmdDKeysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             phone = normalize_phone(user_input[CONF_PHONE])
             self._phone = phone
-            self._client = self._new_client(phone=phone)
+            self._client = await self._new_client(phone=phone)
             _LOGGER.debug(
                 "Starting SMD reauth call request: phone_digits=%s",
                 len(phone),
@@ -277,12 +278,13 @@ class SmdDKeysConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Return the options flow."""
         return SmdDKeysOptionsFlow(config_entry)
 
-    def _new_client(self, *, phone: str, token: str = "") -> SmdDKeysClient:
+    async def _new_client(self, *, phone: str, token: str = "") -> SmdDKeysClient:
         """Create a config-flow API client."""
         return SmdDKeysClient(
             async_get_clientsession(self.hass),
             phone=phone,
             token=token,
+            ssl_context=await self.hass.async_add_executor_job(smd_ssl_context),
         )
 
 
@@ -305,6 +307,7 @@ class SmdDKeysOptionsFlow(config_entries.OptionsFlow):
             token=self._entry.data[CONF_TOKEN],
             cmdc_url=self._entry.data.get(CONF_CMDC_URL),
             l2_url=self._entry.data.get(CONF_L2_URL),
+            ssl_context=await self.hass.async_add_executor_job(smd_ssl_context),
         )
         try:
             await client.async_get_servers()
