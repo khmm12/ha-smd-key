@@ -27,6 +27,7 @@ from .errors import (
     SmdRateLimitError,
 )
 from .helpers import JsonObject
+from .tls import smd_ssl_context
 
 REQUEST_TIMEOUT = ClientTimeout(total=15)
 HTTP_BAD_REQUEST = 400
@@ -104,6 +105,7 @@ class SmdBaseClient:
                 method,
                 url,
                 timeout=REQUEST_TIMEOUT,
+                ssl=smd_ssl_context(),
                 **kwargs,
             ) as response:
                 self._raise_for_status(response, action)
