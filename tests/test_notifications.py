@@ -18,6 +18,7 @@ from custom_components.smd_d_keys.models import SmdDoor, SmdNotification
 from custom_components.smd_d_keys.notification_coordinator import (
     filter_new_notifications,
     merge_notifications,
+    normalize_last_notification_id,
 )
 
 PHOTO_URL = "https://fimg.example.test/photo/1"
@@ -191,6 +192,14 @@ def test_filter_new_notifications() -> None:
     assert filter_new_notifications(notifications, None) == ([], 7)
     assert filter_new_notifications(notifications, 5) == ([notifications[1]], 7)
     assert filter_new_notifications(notifications, 7) == ([], 7)
+
+
+def test_normalize_last_notification_id() -> None:
+    """Treat a stored zero as an uninitialized cursor."""
+    assert normalize_last_notification_id(None) is None
+    assert normalize_last_notification_id(0) is None
+    notification_id = 42
+    assert normalize_last_notification_id(notification_id) == notification_id
 
 
 def test_merge_notifications_prefers_unread() -> None:

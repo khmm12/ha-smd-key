@@ -52,7 +52,9 @@ class SmdNotificationsCoordinator(DataUpdateCoordinator[SmdNotificationsData]):
         self.client = client
         self._store = store
         self._doors = doors
-        self._last_notification_id = last_notification_id
+        self._last_notification_id = normalize_last_notification_id(
+            last_notification_id
+        )
         self._last_full_sync: float | None = None
 
     async def _async_update_data(self) -> SmdNotificationsData:
@@ -107,6 +109,11 @@ class SmdNotificationsCoordinator(DataUpdateCoordinator[SmdNotificationsData]):
         data = {LAST_NOTIFICATION_ID: self._last_notification_id}
         self._store.data = data
         await self._store.async_save(data)
+
+
+def normalize_last_notification_id(value: int | None) -> int | None:
+    """Treat a stored zero as uninitialized so history is not replayed."""
+    return value or None
 
 
 def filter_new_notifications(

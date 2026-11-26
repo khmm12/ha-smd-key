@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.3 - 2026-11-26
+
+- Treat a stored zero notification cursor as uninitialized, so upgrades from
+  0.2.1 record the history baseline instead of replaying old notifications.
+
 ## 0.2.2 - 2026-11-26
 
 - Reconcile the notification history every 15 minutes, so a push that the phone
