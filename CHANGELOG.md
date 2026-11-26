@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.4 - 2026-11-26
+
+- Poll unread notifications every 5 seconds instead of 30, so a doorbell call
+  is reported while it is still ringing. The empty unread response is small;
+  the heavier history reconciliation stays on a 15-minute timer.
+
 ## 0.2.3 - 2026-11-26
 
 - Treat a stored zero notification cursor as uninitialized, so upgrades from
