@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import logging
+import time
+from datetime import datetime, timedelta
 
 from homeassistant.components.camera import Camera, CameraEntityFeature
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed, HomeAssistantError
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.helpers.event import async_track_time_interval
 
 from . import SmdDKeysConfigEntry
 from .api import SmdApiError, SmdAuthError, SmdConnectionError
@@ -17,6 +20,9 @@ from .coordinator import SmdDKeysCoordinator
 from .models import SmdCamera
 
 _LOGGER = logging.getLogger(__name__)
+
+STREAM_REFRESH_CHECK_SECONDS = 30
+STREAM_REFRESH_COOLDOWN_SECONDS = 300
 
 
 async def async_setup_entry(
@@ -73,6 +79,8 @@ class SmdDKeysCamera(Camera):
         self._camera = camera
         door = (coordinator.data or {}).get(camera.door_id)
         self._linked_to_door = door is not None
+        self._stream_source_refreshing = False
+        self._last_stream_source_refresh = time.monotonic()
         self._attr_unique_id = f"{DOMAIN}_{camera.id}_camera"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, camera.door_id)},
@@ -95,6 +103,43 @@ class SmdDKeysCamera(Camera):
     def use_stream_for_stills(self) -> bool:
         """Use the RTSP stream to generate camera proxy still images."""
         return True
+
+    async def async_added_to_hass(self) -> None:
+        """Schedule a source refresh check for failed SMD streams."""
+        await super().async_added_to_hass()
+        self.async_on_remove(
+            async_track_time_interval(
+                self.hass,
+                self._async_check_stream_source,
+                timedelta(seconds=STREAM_REFRESH_CHECK_SECONDS),
+            )
+        )
+
+    async def _async_check_stream_source(self, _now: datetime) -> None:
+        """Refresh RTSP credentials when an existing stream has failed."""
+        stream = self.stream
+        if (
+            stream is None
+            or stream.available
+            or self._stream_source_refreshing
+            or time.monotonic() - self._last_stream_source_refresh
+            < STREAM_REFRESH_COOLDOWN_SECONDS
+        ):
+            return
+        self._stream_source_refreshing = True
+        try:
+            source = await self.stream_source()
+            if source and self.stream is not None:
+                _LOGGER.debug(
+                    "Refreshing SMD camera stream source: camera_id=%s",
+                    self._camera.id,
+                )
+                self.stream.update_source(source)
+        except HomeAssistantError:
+            _LOGGER.debug("SMD camera stream source refresh was rejected")
+        finally:
+            self._stream_source_refreshing = False
+            self._last_stream_source_refresh = time.monotonic()
 
     async def stream_source(self) -> str | None:
         """Return an RTSP stream source for Home Assistant/go2rtc."""
