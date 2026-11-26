@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1 - 2026-11-26
+
+- Fix notification cursor persistence with the Home Assistant storage API.
+- Initialize the image entity with the Home Assistant image base class so the
+  guest photo entity can be added.
+
 ## 0.2.0 - 2026-11-26
 
 - Add a notification event entity for incoming calls, guest photos, and other

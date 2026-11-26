@@ -66,6 +66,11 @@ class SmdDKeysNotificationEvent(
                 self._trigger_event(notification.kind, _event_attributes(notification))
         self.async_write_ha_state()
 
+    async def async_added_to_hass(self) -> None:
+        """Emit notifications that arrived before the entity was added."""
+        await super().async_added_to_hass()
+        self._handle_coordinator_update()
+
 
 def _event_attributes(notification: SmdNotification) -> dict[str, str | int]:
     """Return safe event attributes without SIP or file credentials."""

@@ -86,8 +86,9 @@ class SmdNotificationsCoordinator(DataUpdateCoordinator[SmdNotificationsData]):
     async def _async_save_last_id(self) -> None:
         """Persist the newest seen notification ID."""
         assert self._last_notification_id is not None
-        self._store.data = {LAST_NOTIFICATION_ID: self._last_notification_id}
-        await self._store.async_save()
+        data = {LAST_NOTIFICATION_ID: self._last_notification_id}
+        self._store.data = data
+        await self._store.async_save(data)
 
 
 def filter_new_notifications(

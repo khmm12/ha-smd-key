@@ -42,6 +42,7 @@ class SmdDKeysLastGuestPhoto(
         """Initialize the guest photo image entity."""
         coordinator = entry.runtime_data.notifications
         super().__init__(coordinator)
+        ImageEntity.__init__(self, coordinator.hass)
         self._client = entry.runtime_data.client
         self._image: bytes | None = None
         self._load_lock = asyncio.Lock()
@@ -91,3 +92,8 @@ class SmdDKeysLastGuestPhoto(
             self._image = image
             self._attr_image_last_updated = dt_util.utcnow()
             self.async_write_ha_state()
+
+    async def async_added_to_hass(self) -> None:
+        """Download a photo that arrived before the entity was added."""
+        await super().async_added_to_hass()
+        self._handle_coordinator_update()
