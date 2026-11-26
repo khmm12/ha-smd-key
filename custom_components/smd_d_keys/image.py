@@ -7,7 +7,6 @@ import logging
 
 from homeassistant.components.image import ImageEntity
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
@@ -15,6 +14,7 @@ from homeassistant.util import dt as dt_util
 from . import SmdDKeysConfigEntry
 from .api import SmdApiError, SmdConnectionError
 from .const import DOMAIN, EVENT_GUEST_PHOTO
+from .device import account_device_info
 from .models import SmdNotification
 from .notification_coordinator import SmdNotificationsCoordinator
 
@@ -47,12 +47,7 @@ class SmdDKeysLastGuestPhoto(
         self._image: bytes | None = None
         self._load_lock = asyncio.Lock()
         self._attr_unique_id = f"{DOMAIN}_{entry.entry_id}_last_guest_photo"
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            manufacturer="SMD",
-            model="D-KEYS intercom",
-            name=entry.title,
-        )
+        self._attr_device_info = account_device_info(entry)
 
     async def async_image(self) -> bytes | None:
         """Return the last downloaded guest photo."""

@@ -6,7 +6,6 @@ from typing import ClassVar
 
 from homeassistant.components.event import EventEntity
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -18,6 +17,7 @@ from .const import (
     EVENT_MESSAGE,
     EVENT_OTHER,
 )
+from .device import account_device_info
 from .models import SmdNotification
 from .notification_coordinator import SmdNotificationsCoordinator
 
@@ -50,12 +50,7 @@ class SmdDKeysNotificationEvent(
         coordinator = entry.runtime_data.notifications
         super().__init__(coordinator)
         self._attr_unique_id = f"{DOMAIN}_{entry.entry_id}_notification_event"
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, entry.entry_id)},
-            manufacturer="SMD",
-            model="D-KEYS intercom",
-            name=entry.title,
-        )
+        self._attr_device_info = account_device_info(entry)
 
     @callback
     def _handle_coordinator_update(self) -> None:

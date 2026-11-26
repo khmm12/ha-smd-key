@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.5 - 2026-11-26
+
+- Mark the account-level notification device as a service and name it
+  "Уведомления <account>" instead of duplicating the intercom device name.
+
 ## 0.2.4 - 2026-11-26
 
 - Poll unread notifications every 5 seconds instead of 30, so a doorbell call
